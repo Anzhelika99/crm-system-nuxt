@@ -1,6 +1,25 @@
 <script lang="ts" setup>
-
 import {Button} from "~/components/ui/button";
+import {useAuthStore, useIsLoadingStore} from "~/stores/auth.store";
+import {useRouter} from "#app";
+import {account} from "~/lib/appwrite";
+
+const isLoadingStore = useIsLoadingStore()
+const store = useAuthStore()
+const router = useRouter()
+const logOut = async () => {
+
+  isLoadingStore.set(true)
+
+  await account.deleteSession('current')
+
+  store.clear()
+
+  await router.push('/login')
+
+  isLoadingStore.set(false)
+
+}
 </script>
 
 <template>
@@ -9,7 +28,7 @@ import {Button} from "~/components/ui/button";
       <NuxtImg src="/logo.svg" width="140px" alt="logo" class="mx-auto"/>
     </NuxtLink>
 
-    <button class="absolute top-2 right-3 transition-colors hover:text-primary">
+    <button class="absolute top-2 right-3 transition-colors hover:text-primary" @click="logOut">
       <Icon name="line-md:logout" size="20"/>
     </button>
     <LayoutMenu />

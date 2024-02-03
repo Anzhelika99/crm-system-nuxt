@@ -1,12 +1,33 @@
 <script lang="ts" setup>
- import Sidebar from "~/components/layout/Sidebar.vue";
+  import {account} from "~/lib/appwrite";
+  import {useIsLoadingStore, useAuthStore} from "~/stores/auth.store";
+  import Sidebar from "~/components/layout/Sidebar.vue";
+  import {useRouter} from "#app";
 
- console.log("Loaded")
+  const isLoadingStore = useIsLoadingStore()
+  const store = useAuthStore()
+  const router = useRouter()
+
+  onMounted(async () => {
+    try {
+      const user = await account.get()
+
+      if (user) {
+        store.set(user)
+      }
+
+    } catch (error) {
+      await router.push('/login')
+    } finally {
+      isLoadingStore.set(false)
+    }
+  })
 </script>
 
 <template>
-  <section class="grid" style="min-height: 100vh">
-    <LayoutSidebar />
+  <LayoutLoader v-if="isLoadingStore.isLoading" />
+  <section v-else :class="{grid:store.isAuth}" style="min-height: 100vh">
+    <LayoutSidebar v-if='store.isAuth' />
     <div>
       <slot />
     </div>
